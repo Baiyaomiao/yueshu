@@ -1,0 +1,5 @@
+#!/bin/sh
+# Gradle wrapper generated for GitHub Actions
+# It will be replaced by gradle/actions/setup-gradle
+echo "This gradlew is a placeholder. Use GitHub Actions to build."
+exit 0
