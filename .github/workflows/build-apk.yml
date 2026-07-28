@@ -9,23 +9,83 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Install deps and sync
+      - uses: android-actions/setup-android@v3
+      - name: Create Android WebView project
         run: |
-          npm install @capacitor/core
-          cp app.html www/index.html
-          npx cap sync android
-      - name: Build APK
-        working-directory: ./android
-        run: ./gradlew assembleDebug --no-daemon
-      - name: Find and Upload APK
+          mkdir -p app/src/main/java/com/example/webviewapp
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/mipmap-hdpi
+          # Main activity
+          cat > app/src/main/java/com/example/webviewapp/MainActivity.java << 'JAVA'
+          package com.example.webviewapp;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebSettings;
+          import androidx.appcompat.app.AppCompatActivity;
+          public class MainActivity extends AppCompatActivity {
+              @Override protected void onCreate(Bundle b) {
+                  super.onCreate(b);
+                  WebView wv = new WebView(this);
+                  WebSettings s = wv.getSettings();
+                  s.setJavaScriptEnabled(true);
+                  s.setDomStorageEnabled(true);
+                  s.setAllowFileAccess(true);
+                  wv.loadUrl("file:///android_asset/index.html");
+                  setContentView(wv);
+              }
+          }
+JAVA
+          cp app.html app/src/main/assets/index.html
+          # Manifest
+          cat > app/src/main/AndroidManifest.xml << 'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest package="com.example.webviewapp" xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <application android:label="阅书" android:theme="@style/AppTheme">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+XML
+          cat > app/src/main/res/values/styles.xml << 'XML2'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources><style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar"><item name="android:windowNoTitle">true</item><item name="android:windowActionBar">false</item></style></resources>
+XML2
+          # Build files
+          curl -sL -o /tmp/gradle8.5.zip https://services.gradle.org/distributions/gradle-8.5-bin.zip
+          unzip -qo /tmp/gradle8.5.zip -d /tmp/
+          export PATH="/tmp/gradle-8.5/bin:$PATH"
+          cat > settings.gradle << 'SG'
+          rootProject.name = 'App'
+          include ':app'
+SG
+          cat > build.gradle << 'BG'
+          buildscript {
+              repositories { google(); mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
+          }
+          allprojects { repositories { google(); mavenCentral() } }
+BG
+          cat > app/build.gradle << 'ABG'
+          plugins { id 'com.android.application' }
+          android {
+              namespace 'com.example.webviewapp'
+              compileSdk 34
+              defaultConfig { applicationId 'com.example.webviewapp'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0' }
+              buildTypes { release { minifyEnabled false } }
+          }
+          dependencies { implementation 'androidx.appcompat:appcompat:1.7.0' }
+ABG
+          cat > gradle.properties << 'GP'
+          org.gradle.jvmargs=-Xmx2g
+          android.useAndroidX=true
+GP
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          # Build
+          gradle assembleDebug --no-daemon -p .
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
-          path: |
-            android/app/build/outputs/apk/debug/*.apk
-            android/app/build/outputs/*.apk
+          path: app/build/outputs/apk/debug/*.apk
