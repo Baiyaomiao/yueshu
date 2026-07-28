@@ -373,7 +373,7 @@ $('rBk').addEventListener('click',function(){$('rdr').classList.remove('show');c
 function oTc(){if(!curN||!curN._cs)return;$('tcL').innerHTML=curN._cs.map(function(c,i){return '<div class="ti'+(i===curC?' ac':'')+'" onclick="jC('+i+')">'+es(c.title||'无标题')+'</div>';}).join('');$('tcOv').style.display='block';$('tcOv').classList.add('s');$('tcPn').classList.add('s');}
 function cTc(){$('tcOv').style.display='none';$('tcOv').classList.remove('s');$('tcPn').classList.remove('s');}
 function jC(i){curC=i;curP=0;rPg();cTc();}
-$('rTo').addEventListener('click',oTc);
+
 $('tcOv').addEventListener('click',cTc);
 $('tcX').addEventListener('click',cTc);
 
@@ -514,12 +514,12 @@ function dBm(i){var bs=loadBm();var items=bs.filter(function(b){return b.nid===c
 function oBm(){renderBm();$('bmOv').style.display='block';$('bmOv').classList.add('s');$('bmPn').classList.add('s');}
 function cBm(){$('bmOv').style.display='none';$('bmOv').classList.remove('s');$('bmPn').classList.remove('s');}
 $('bmAdd').addEventListener('click',function(){if(!curN)return;var bs=loadBm();var ch=curN._cs&&curN._cs[curC]?curN._cs[curC].title:'未知';var d=new Date();var t=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');bs.push({nid:curN.id,chapter:ch,chapterIdx:curC,pos:curP,time:t,ts:Date.now()});saveBm(bs);renderBm();tt('✅ 已添加书签');});
-$('rBm').addEventListener('click',oBm);$('bmOv').addEventListener('click',cBm);$('bmX').addEventListener('click',cBm);
+$('bmOv').addEventListener('click',cBm);$('bmX').addEventListener('click',cBm);
 
 /* full-text search */
 function oFs(){$('fsOv').style.display='block';$('fsOv').classList.add('s');$('fsPn').classList.add('s');$('fsIn').value='';$('fsIn').focus();$('fsL').innerHTML='<div class=\"empty\"><div class=\"ei\">🔍</div><p>输入关键词搜索</p></div>';}
 function cFs(){$('fsOv').style.display='none';$('fsOv').classList.remove('s');$('fsPn').classList.remove('s');}
-$('rFs').addEventListener('click',oFs);$('fsOv').addEventListener('click',cFs);$('fsX').addEventListener('click',cFs);
+$('fsOv').addEventListener('click',cFs);$('fsX').addEventListener('click',cFs);
 $('fsIn').addEventListener('keydown',function(e){if(e.key==='Enter')doFs();});
 $('fsGo').addEventListener('click',doFs);
 function doFs(){var q=$('fsIn').value.trim().toLowerCase();var el=$('fsL');if(!q||!curN||!curN.content){el.innerHTML='<div class=\"empty\"><div class=\"ei\">🔍</div><p>输入关键词搜索</p></div>';return;}
