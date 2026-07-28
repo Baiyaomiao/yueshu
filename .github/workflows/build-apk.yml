@@ -9,15 +9,28 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
-      - uses: android-actions/setup-android@v3
-      - name: Create Android WebView project
+      - name: Build APK
         run: |
-          mkdir -p app/src/main/java/com/example/webviewapp
-          mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/mipmap-hdpi
-          # Main activity
-          cat > app/src/main/java/com/example/webviewapp/MainActivity.java << 'JAVA'
-          package com.example.webviewapp;
+          set -e
+          echo "=== Setting up Android SDK ==="
+          cd /tmp
+          curl -sL -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q cmdline-tools.zip
+          mkdir -p android-sdk/cmdline-tools
+          mv cmdline-tools android-sdk/cmdline-tools/latest
+          export ANDROID_HOME=/tmp/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          yes | sdkmanager --sdk_root=$ANDROID_HOME "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
+          echo "SDK ready"
+          
+          echo "=== Creating project ==="
+          mkdir -p /tmp/project/app/src/main/assets
+          mkdir -p /tmp/project/app/src/main/java/ys/reader
+          mkdir -p /tmp/project/app/src/main/res/values
+          cp $GITHUB_WORKSPACE/app.html /tmp/project/app/src/main/assets/index.html
+          
+          cat > /tmp/project/app/src/main/java/ys/reader/MainActivity.java << 'JAVA'
+          package ys.reader;
           import android.os.Bundle;
           import android.webkit.WebView;
           import android.webkit.WebSettings;
@@ -35,11 +48,10 @@ jobs:
               }
           }
 JAVA
-          cp app.html app/src/main/assets/index.html
-          # Manifest
-          cat > app/src/main/AndroidManifest.xml << 'XML'
+          
+          cat > /tmp/project/app/src/main/AndroidManifest.xml << 'XML'
           <?xml version="1.0" encoding="utf-8"?>
-          <manifest package="com.example.webviewapp" xmlns:android="http://schemas.android.com/apk/res/android">
+          <manifest package="ys.reader" xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET"/>
               <application android:label="阅书" android:theme="@style/AppTheme">
                   <activity android:name=".MainActivity" android:exported="true">
@@ -48,44 +60,57 @@ JAVA
               </application>
           </manifest>
 XML
-          cat > app/src/main/res/values/styles.xml << 'XML2'
+          
+          cat > /tmp/project/app/src/main/res/values/styles.xml << 'XML2'
           <?xml version="1.0" encoding="utf-8"?>
-          <resources><style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar"><item name="android:windowNoTitle">true</item><item name="android:windowActionBar">false</item></style></resources>
+          <resources>
+              <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+                  <item name="android:windowNoTitle">true</item>
+                  <item name="android:windowActionBar">false</item>
+              </style>
+          </resources>
 XML2
-          # Build files
-          curl -sL -o /tmp/gradle8.5.zip https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip -qo /tmp/gradle8.5.zip -d /tmp/
-          export PATH="/tmp/gradle-8.5/bin:$PATH"
-          cat > settings.gradle << 'SG'
-          rootProject.name = 'App'
+          
+          cat > /tmp/project/settings.gradle << 'SG'
+          rootProject.name = 'Yueshu'
           include ':app'
 SG
-          cat > build.gradle << 'BG'
+          
+          cat > /tmp/project/build.gradle << 'BG'
           buildscript {
               repositories { google(); mavenCentral() }
               dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
           }
           allprojects { repositories { google(); mavenCentral() } }
 BG
-          cat > app/build.gradle << 'ABG'
+          
+          cat > /tmp/project/app/build.gradle << 'ABG'
           plugins { id 'com.android.application' }
           android {
-              namespace 'com.example.webviewapp'
+              namespace 'ys.reader'
               compileSdk 34
-              defaultConfig { applicationId 'com.example.webviewapp'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0' }
+              defaultConfig { applicationId 'ys.reader'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0' }
               buildTypes { release { minifyEnabled false } }
           }
           dependencies { implementation 'androidx.appcompat:appcompat:1.7.0' }
 ABG
-          cat > gradle.properties << 'GP'
-          org.gradle.jvmargs=-Xmx2g
-          android.useAndroidX=true
-GP
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          # Build
-          gradle assembleDebug --no-daemon -p .
-      - name: Upload
+          
+          echo "sdk.dir=$ANDROID_HOME" > /tmp/project/local.properties
+          echo "org.gradle.jvmargs=-Xmx2g" > /tmp/project/gradle.properties
+          echo "android.useAndroidX=true" >> /tmp/project/gradle.properties
+          
+          echo "=== Building APK ==="
+          curl -sL -o gradle-8.5-bin.zip https://services.gradle.org/distributions/gradle-8.5-bin.zip
+          unzip -q gradle-8.5-bin.zip
+          export PATH=/tmp/gradle-8.5/bin:$PATH
+          cd /tmp/project
+          gradle assembleDebug --no-daemon -q
+          
+          echo "=== APK output ==="
+          ls -la /tmp/project/app/build/outputs/apk/debug/
+          cp /tmp/project/app/build/outputs/apk/debug/*.apk /tmp/app-debug.apk || true
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: /tmp/app-debug.apk
