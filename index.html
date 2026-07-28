@@ -134,7 +134,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
 /* ===== TOC ===== */
 .tl{max-height:50vh;overflow-y:auto;padding:4px 0}
 .ti{padding:11px 16px;font-size:13px;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
-.ti:hover{background:rgba(128,128,128,.03)}.bm-i{padding:12px 16px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}.bm-i:active{background:rgba(128,128,128,.04)}.bm-i .bm-t{font-weight:600;font-size:13px}.bm-i .bm-s{font-size:11px;color:var(--text3);margin-top:2px}.bm-i .bm-d{font-size:11px;color:var(--accent);float:right;background:0;border:none;cursor:pointer;padding:2px 6px;border-radius:4px}
+.rmi{display:flex;align-items:center;padding:14px 20px;font-size:15px;cursor:pointer;transition:background .15s;color:var(--text);border-radius:8px;margin:0 6px}.rmi:active{background:rgba(128,128,128,.06)}.ti:hover{background:rgba(128,128,128,.03)}.bm-i{padding:12px 16px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}.bm-i:active{background:rgba(128,128,128,.04)}.bm-i .bm-t{font-weight:600;font-size:13px}.bm-i .bm-s{font-size:11px;color:var(--text3);margin-top:2px}.bm-i .bm-d{font-size:11px;color:var(--accent);float:right;background:0;border:none;cursor:pointer;padding:2px 6px;border-radius:4px}
 .ti:active{background:rgba(128,128,128,.06)}
 .ti.ac{border-left-color:var(--accent);background:rgba(192,57,43,.05);color:var(--accent);font-weight:600}
 
@@ -190,7 +190,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
   <div class="rt" id="rTop">
     <button class="hi" id="rBk" style="font-size:20px;width:auto;padding:0 8px">‹</button>
     <div class="rti" id="rTi">阅读</div>
-    <button class="hi" id="rBm">🔖</button><button class="hi" id="rFs">🔍</button><button class="hi" id="rTo">📖</button>
+    <button class="hi" id="rMo" style="font-size:24px;font-weight:700;line-height:1">⋮</button>
   </div>
   <div class="rb" id="rBd">
     <div class="tz tz-l" id="tzP"></div>
@@ -207,7 +207,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
     <span class="ri" id="pgIn">1/1</span>
     <button class="rtb" id="rFb">Aa</button>
     <button class="rtb" id="rTb">☀</button>
-    <button class="rtb" id="rPl" style="font-size:16px">▶</button>
     <button class="rtb" id="rDb">⬇</button>
     <button class="rn" id="nxCh">›</button>
   </div>
@@ -254,7 +253,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
   <div style="border-top:1px solid var(--border);margin:14px 0 10px;padding-top:14px"><div style="font-size:14px;font-weight:600;margin-bottom:14px;text-align:center">🖼 自定义背景</div><div class="spr"><button class="hi" id="bgBtn" style="font-size:12px;width:auto;padding:6px 14px;border:1px solid var(--border);border-radius:8px">📁 选择图片</button><button class="hi" id="bgRst" style="font-size:12px;width:auto;padding:6px 14px;border:1px solid var(--border);border-radius:8px;color:var(--accent)">🗑 移除</button></div><div class="spr"><label style="min-width:auto">🌫 模糊</label><input type="range" id="bgBl" min="0" max="20" value="0"><span style="font-size:12px;color:var(--text2);min-width:28px;text-align:center" id="bgBlL">0px</span></div><div id="bgPr" style="width:100%;height:60px;border-radius:8px;border:1px solid var(--border);background-size:cover;background-position:center;margin-top:6px;background:var(--bg)" class="bg-na"><div style="text-align:center;line-height:60px;font-size:12px;color:var(--text3)">未设置背景</div></div><input type="file" id="bgIn" accept="image/*" style="display:none"></div>
 
   <div class="spr"><label>🔄 翻页</label><select id="pgMd"><option value="tap">点击翻页</option><option value="slide">横滑翻页</option><option value="scroll">上下滑动</option><option value="none">无动效</option></select></div>
-  <div class="spr" id="autoPlR" style="display:none"><label>⏱ 自动翻页</label><input type="range" id="autoPlSp" min="5" max="60" value="15"><span style="font-size:12px;color:var(--text2);min-width:40px;text-align:center" id="autoPlL">15秒</span></div>
+  </div>
+
+<div class="so" id="rMenuOv" style="z-index:50"></div>
+<div class="sp" id="rMenuPn" style="z-index:51;border-radius:14px;padding:10px 0;transform:translateY(100%);transition:transform .25s cubic-bezier(.32,.72,0,1);max-width:340px;margin:0 auto;width:calc(100% - 40px)">
+  <div class="rmi" data-a="settings"><span style="font-size:18px;margin-right:12px">⚙</span>阅读设置</div>
+  <div class="rmi" data-a="bookmark"><span style="font-size:18px;margin-right:12px">🔖</span>添加书签</div>
+  <div class="rmi" data-a="search"><span style="font-size:18px;margin-right:12px">🔍</span>全文搜索</div>
+  <div class="rmi" data-a="toc"><span style="font-size:18px;margin-right:12px">📖</span>目录</div>
 </div>
 
 <div class="so" id="tcOv"></div>
@@ -286,7 +292,7 @@ async function svCont(id,c){try{var d=await idbO();var t=d.transaction(DS,'readw
 ldDB();
 
 function $(id){return document.getElementById(id);}
-let curN=null,curC=0,curP=0,pgs=[],sF='recent',dOn=false,pgMd='tap',autoPl=false,autoTm=null,ahTm=null,ahOn=true,plTimer=null;
+let curN=null,curC=0,curP=0,pgs=[],sF='recent',dOn=false,pgMd='tap',ahTm=null,ahOn=true;
 const CV=['#c0392b','#2c6e49','#2c5282','#6b46c1','#b7791f','#2d3748','#553c7b','#9b2c2c'];
 
 /* ===== Enhanced chapter parsing ===== */
@@ -362,7 +368,7 @@ $('tzN').addEventListener('click',function(){if(pgMd!='tap')return;nP();rstAh();
 $('pgBa').addEventListener('input',function(){if(!curN||!curN._cs)return;var t=curN._cs.length,idx=Math.round(parseInt(this.value)/100*(t-1));if(idx!==curC){curC=idx;curP=0;rPg();}});
 $('prCh').addEventListener('click',function(){if(curC>0){curC--;curP=0;rPg();}});
 $('nxCh').addEventListener('click',function(){if(curN&&curC<curN._cs.length-1){curC++;curP=0;rPg();}});
-$('rBk').addEventListener('click',function(){$('rdr').classList.remove('show');curN=null;rSh();clearAutoPl();});
+$('rBk').addEventListener('click',function(){$('rdr').classList.remove('show');curN=null;rSh();;});
 
 function oTc(){if(!curN||!curN._cs)return;$('tcL').innerHTML=curN._cs.map(function(c,i){return '<div class="ti'+(i===curC?' ac':'')+'" onclick="jC('+i+')">'+es(c.title||'无标题')+'</div>';}).join('');$('tcOv').style.display='block';$('tcOv').classList.add('s');$('tcPn').classList.add('s');}
 function cTc(){$('tcOv').style.display='none';$('tcOv').classList.remove('s');$('tcPn').classList.remove('s');}
@@ -383,32 +389,15 @@ $('pgMd').addEventListener('change',function(){
   if(pgMd==='scroll'){
     ct.style.overflowY='auto';ct.style.overflowX='hidden';ct.style.maxHeight='100%';
     $('tzP').style.display='none';$('tzN').style.display='none';$('pgBa').style.display='none';$('pgIn').style.display='none';
-    $('autoPlR').style.display='';
   }else{
     ct.style.overflowY='';ct.style.overflowX='';ct.style.maxHeight='';
     $('tzP').style.display='';$('tzN').style.display='';$('pgBa').style.display='';$('pgIn').style.display='';
-    $('autoPlR').style.display='none';
   }
   try{localStorage.setItem('ys_pg',pgMd);}catch(e){}
   if(curN)rPg();
 });
 (function(){try{var p=localStorage.getItem('ys_pg');if(p){$('pgMd').value=p;$('pgMd').dispatchEvent(new Event('change'));}}catch(e){}})();
 
-/* Auto page turn */
-$('rPl').addEventListener('click',function(){
-  if(autoPl){clearAutoPl();$('rPl').textContent='▶';$('rPl').style.color='';}
-  else{
-    autoPl=true;$('rPl').textContent='⏸';$('rPl').style.color='var(--accent)';
-    var sp=parseInt($('autoPlSp').value);
-    plTimer=setInterval(function(){nP();},sp*1000);
-  }
-  rstAh();
-});
-$('autoPlSp').addEventListener('input',function(){
-  $('autoPlL').textContent=this.value+'秒';
-  if(autoPl){clearInterval(plTimer);var sp=parseInt(this.value);plTimer=setInterval(function(){nP();},sp*1000);}
-});
-function clearAutoPl(){autoPl=false;clearInterval(plTimer);plTimer=null;}
 
 document.querySelectorAll('.td').forEach(function(d){d.addEventListener('click',function(){document.querySelectorAll('.td').forEach(function(x){x.classList.remove('ac');});d.classList.add('ac');var t=d.dataset.t;document.body.className='theme-'+t;try{localStorage.setItem('ys_th',t);}catch(e){}});});
 (function(){try{var st=localStorage.getItem('ys_th');if(st){document.body.className='theme-'+st;document.querySelectorAll('.td').forEach(function(x){x.classList.toggle('ac',x.dataset.t===st);});}}catch(e){}})();
@@ -491,6 +480,26 @@ $('rDb').addEventListener('click',function(){if(curN)dN(curN.id);});
 
 (async function(){await _rdyP;rSh();})();
 window.dB=dB;window.dN=dN;window.oR=oR;window.jC=jC;
+
+/* Reader floating menu */
+function rMenuToggle(){
+  var ov=$('rMenuOv'),pn=$('rMenuPn');
+  if(ov.style.display==='block'){ov.style.display='none';ov.classList.remove('s');pn.classList.remove('s');}
+  else{ov.style.display='block';ov.classList.add('s');pn.classList.add('s');}
+}
+function rMenuClose(){var ov=$('rMenuOv'),pn=$('rMenuPn');ov.style.display='none';ov.classList.remove('s');pn.classList.remove('s');}
+$('rMo').addEventListener('click',function(e){e.stopPropagation();rMenuToggle();rstAh();});
+$('rMenuOv').addEventListener('click',rMenuClose);
+document.querySelectorAll('.rmi').forEach(function(el){
+  el.addEventListener('click',function(){
+    var a=this.dataset.a;rMenuClose();
+    if(a==='settings')oSt();
+    else if(a==='bookmark'){if(!curN)return;var bs=loadBm();var ch=curN._cs&&curN._cs[curC]?curN._cs[curC].title:'未知';var d=new Date();var tm=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');bs.push({nid:curN.id,chapter:ch,chapterIdx:curC,pos:curP,time:tm,ts:Date.now()});saveBm(bs);tt('✅ 已添加书签');}
+    else if(a==='search')oFs();
+    else if(a==='toc')oTc();
+  });
+});
+
 /* one-hand */
 var ohOn=true;(function(){var el=$('ohTg');if(!el)return;el.addEventListener('click',function(){ohOn=!ohOn;this.textContent=ohOn?'开启':'关闭';this.style.color=ohOn?'var(--accent)':'var(--text2)';var a=$('tzP'),b=$('tzN');if(ohOn){a.style.display='';b.style.display='';}else{a.style.display='none';b.style.display='none';}try{localStorage.setItem('ys_oh',ohOn?'1':'0');}catch(e){}});
 try{if(localStorage.getItem('ys_oh')==='0')el.click();}catch(e){}})();
