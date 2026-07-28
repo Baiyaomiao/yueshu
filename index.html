@@ -297,7 +297,8 @@ const CV=['#c0392b','#2c6e49','#2c5282','#6b46c1','#b7791f','#2d3748','#553c7b',
 
 /* ===== Enhanced chapter parsing ===== */
 function parseChapters(text){
-  var lines=text.split('\n').filter(function(l){return l.trim();});
+  var lines=text.split('
+').filter(function(l){return l.trim();});
   var rx=/^(第[一二三四五六七八九十百千0-9零一二三四五六七八九十百千万]+[章节部回集篇]|第[0-9]+章|\d+\.\s+|Chapter\s+\d+|序章|前言|序幕|尾声|后记|番外|楔子)/i;
   var cs=[],cu={title:'开头',content:''},cnt=0;
   lines.forEach(function(l){
@@ -341,7 +342,7 @@ function oR(id){var n=DB.novels.find(function(x){return x.id===id;});if(!n)retur
 function rPg(){if(!curN||!curN._cs)return;var cs=curN._cs;if(curC>=cs.length)curC=cs.length-1;if(curC<0)curC=0;var ch=cs[curC];
   if(pgMd==='scroll'){sRender(ch.content);$('chTi').textContent=ch.title;$('pgIn').textContent=(curC+1)+'/'+cs.length;var nn=DB.novels.find(function(x){return x.id===curN.id;});if(nn){nn.progress=Math.round((curC+1)/cs.length*100);nn.readAt=Date.now();svMeta();}return;}
   $('chTi').textContent=ch.title;pgs=cPg(ch.content);if(curP>=pgs.length)curP=pgs.length-1;if(curP<0)curP=0;sPg();var t=cs.length;$('pgBa').value=t>1?Math.round(curC/(t-1)*100):0;$('pgIn').textContent=(curC+1)+'/'+t;var nn=DB.novels.find(function(x){return x.id===curN.id;});if(nn){nn.progress=Math.round((curC+1)/t*100);nn.readAt=Date.now();svMeta();}}
-function sPg(){if(!pgs||pgs.length===0||pgMd==='scroll')return;var h=$('chTx').offsetHeight;if(h<10)h=400;$('pgCt').style.transform='translateY(-'+(curP*h)+'px)';$('pgCt').style.transition='transform .25s cubic-bezier(.32,.72,0,1)';}
+function sPg(){if(!pgs||pgs.length===0||pgMd==='scroll'||pgMd==='none')return;var h=$('chTx').offsetHeight;if(h<10)h=400;$('pgCt').style.transform='translateY(-'+(curP*h)+'px)';$('pgCt').style.transition='transform .25s cubic-bezier(.32,.72,0,1)';}
 function nP(){if(pgMd==='scroll'){if(curC<curN._cs.length-1){curC++;rPg();}return;}if(curP<pgs.length-1){curP++;sPg();}else if(curC<curN._cs.length-1){curC++;curP=0;rPg();}}
 function pP(){if(pgMd==='scroll'){if(curC>0){curC--;rPg();}return;}if(curP>0){curP--;sPg();}else if(curC>0){curC--;curP=999;rPg();curP=pgs.length-1;sPg();}}
 
@@ -551,11 +552,11 @@ $('fsOv').addEventListener('click',cFs);$('fsX').addEventListener('click',cFs);
 $('fsIn').addEventListener('keydown',function(e){if(e.key==='Enter')doFs();});
 $('fsGo').addEventListener('click',doFs);
 function doFs(){var q=$('fsIn').value.trim().toLowerCase();var el=$('fsL');if(!q||!curN||!curN.content){el.innerHTML='<div class=\"empty\"><div class=\"ei\">🔍</div><p>输入关键词搜索</p></div>';return;}
-var lines=curN.content.split('\\n');var rs=[];lines.forEach(function(l,i){if(l.toLowerCase().indexOf(q)!==-1)rs.push({line:i,text:l.substring(0,80)});});
+var lines=curN.content.split('\n');var rs=[];lines.forEach(function(l,i){if(l.toLowerCase().indexOf(q)!==-1)rs.push({line:i,text:l.substring(0,80)});});
 if(rs.length===0){el.innerHTML='<div class=\"empty\"><div class=\"ei\">📖</div><p>未找到 "<b>'+es(q)+'</b>"</p></div>';return;}
 el.innerHTML=rs.slice(0,100).map(function(r){return '<div class=\"ti\" onclick=\"jFs('+r.line+')\">'+es(r.text)+'</div>';}).join('')+(rs.length>100?'<div style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">...还有 '+(rs.length-100)+' 条结果</div>':'');
 }
-function jFs(i){if(!curN||!curN._cs)return;var n=0;for(var c=0;c<curN._cs.length;c++){var ch=curN._cs[c];var ls=(ch.content||'').split('\\n').filter(Boolean);if(n+ls.length>i){curC=c;curP=0;rPg();cFs();return;}n+=ls.length;}}
+function jFs(i){if(!curN||!curN._cs)return;var n=0;for(var c=0;c<curN._cs.length;c++){var ch=curN._cs[c];var ls=(ch.content||'').split('\n').filter(Boolean);if(n+ls.length>i){curC=c;curP=0;rPg();cFs();return;}n+=ls.length;}}
 
 
 </script>
