@@ -9,38 +9,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      
+      - name: Create Android WebView project
+        id: create
+        uses: twlz0ne/android-webview-apk-action@v1
         with:
-          java-version: 17
-          distribution: 'temurin'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Capacitor
-        run: |
-          npm install @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2
-
-      - name: Copy app
-        run: cp app.html index.html
-
-      - name: Init and add Android
-        run: |
-          npx cap init 阅书 ys.reader --webDir .
-          npx cap add android
-
-      - name: Build APK
-        working-directory: ./android
-        run: ./gradlew assembleDebug --no-daemon
-
+          app_name: 阅书
+          package_name: ys.reader
+          version_code: 1
+          version_name: "1.0.0"
+          html_file: index.html
+          icon: icon-512.png
+          
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: ${{ steps.create.outputs.apk_path }}
