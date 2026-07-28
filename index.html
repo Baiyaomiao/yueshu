@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>阅书 · 小说阅读平台</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #f5f0e8; --card: #faf6ef; --text: #3a342b; --text2: #8a7e6b; --text3: #b8aa96;
+    --accent: #c0392b; --accent-hover: #a93226; --border: #e8e0d2;
+    --success: #2d8a3e; --warn: #b7791f; --danger: #c0392b;
+    --font-size: 18px; --line-height: 1.9; --header-h: 52px;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; max-width: 520px; margin: 0 auto; overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+  input, button, textarea, select { font-family: inherit; }
+  ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .header {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+    background: var(--card); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; z-index: 30; transition: background 0.3s;
+  }
+  .header-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .header-title .brand { color: var(--accent); }
+  .header-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px; border: none;
+    background: transparent; color: var(--text2); font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .icon-btn:hover { background: rgba(128,128,128,0.06); }
+
+  .btn {
+    padding: 10px 24px; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; justify-content: center;
+    transition: all 0.15s;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn-ghost { background: rgba(128,128,128,0.06); color: var(--text); }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-block { width: 100%; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+
+  .card {
+    background: var(--card); border-radius: 12px; padding: 16px;
+    margin-bottom: 12px; border: 1px solid var(--border); transition: background 0.3s;
+  }
+  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-p { background: #fff3cd; color: #856404; }
+  .badge-a { background: #d4edda; color: #155724; }
+  .badge-r { background: #f8d7da; color: #721c24; }
+
+  input, select, textarea {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 14px; background: #fff;
+    color: var(--text); outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  .form-group { margin-bottom: 14px; }
+
+  .page { display: none; padding: calc(var(--header-h) + 16px) 16px 100px; animation: fadeIn 0.2s; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .auth-box { max-width: 360px; margin: 40px auto; text-align: center; }
+  .auth-box .logo { font-size: 48px; margin-bottom: 8px; }
+  .auth-box h1 { font-size: 22px; margin-bottom: 4px; }
+  .auth-box p { color: var(--text2); font-size: 14px; margin-bottom: 20px; }
+  .auth-link { font-size: 13px; color: var(--text2); margin-top: 12px; }
+  .auth-link a { color: var(--accent); cursor: pointer; }
+
+  .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 10px; }
+  .book-card { cursor: pointer; transition: transform 0.15s; }
+  .book-card:active { transform: scale(0.95); }
+  .book-cover {
+    width: 100%; aspect-ratio: 3/4; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; padding: 8px; text-align: center;
+    position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 12px; overflow: hidden;
+  }
+  .book-cover .emoji { font-size: 28px; margin-bottom: 4px; }
+  .book-cover .title { font-size: 11px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .book-cover .bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.15); }
+  .book-cover .bar .f { height: 100%; background: rgba(255,255,255,0.6); border-radius: 0 2px 2px 0; }
+  .book-name { font-size: 12px; margin-top: 6px; text-align: center; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .upload-area {
+    border: 2px dashed var(--border); border-radius: 12px;
+    padding: 32px 20px; text-align: center; cursor: pointer; margin-bottom: 16px;
+  }
+  .upload-area:hover { border-color: var(--accent); background: rgba(192,57,43,0.02); }
+  .upload-area .icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-area .hint { font-size: 14px; color: var(--text2); }
+  .upload-area .sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  .novel-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-bottom: 1px solid var(--border);
+  }
+  .novel-item:last-child { border-bottom: none; }
+  .novel-item .info { flex: 1; min-width: 0; }
+  .novel-item .info .t { font-size: 14px; font-weight: 600; }
+  .novel-item .info .s { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  .reader-title { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 24px; }
+  .reader-content { font-size: var(--font-size); line-height: var(--line-height); text-align: justify; }
+  .reader-content p { text-indent: 2em; margin-bottom: 0.5em; }
+  .reader-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border);
+  }
+
+  .tab-bar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 520px; height: 52px;
+    background: var(--card); border-top: 1px solid var(--border);
+    display: flex; z-index: 30; backdrop-filter: blur(8px);
+  }
+  .tab-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 1px; background: none; border: none;
+    color: var(--text3); font-size: 10px; cursor: pointer; position: relative;
+  }
+  .tab-btn .ti { font-size: 20px; }
+  .tab-btn.active { color: var(--accent); }
+  .tab-btn.active::after { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px; background: var(--accent); border-radius: 0 0 2px 2px; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  .toast {
+    position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+    background: #333; color: #fff; padding: 10px 20px; border-radius: 8px;
+    font-size: 13px; z-index: 100; animation: tin 0.3s;
+  }
+  @keyframes tin { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  .flex-1 { flex: 1; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  .form-row { display: flex; gap: 10px; }
+  .form-row > * { flex: 1; }
+  .mt-8 { margin-top: 8px; }
+
+  @media (max-width:400px) { .book-grid { gap: 8px; } }
+  /* Chapter sidebar */
+  .overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.4);display:none}
+  .overlay.s{display:block}
+  .cp{position:fixed;top:0;right:-100%;width:80%;max-width:340px;height:100%;background:var(--card);z-index:51;transition:right .25s;display:flex;flex-direction:column}
+  .cp.s{right:0}
+  .cp .ch{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .cp .ch h3{font-size:15px;font-weight:700}
+  .cp .ch .cx{font-size:20px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:0;background:0;color:var(--text2)}
+  .cl{flex:1;overflow-y:auto;padding:8px 0}
+  .ci{padding:10px 16px;font-size:13px;cursor:pointer;border-left:3px solid transparent}
+  .ci:hover{background:rgba(128,128,128,.04)}
+  .ci.a{border-left-color:var(--accent);background:rgba(192,57,43,.04);color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="chOv"></div>
+<div class="cp" id="chP">
+  <div class="ch"><h3>📖 目录</h3><button class="cx" id="chX">✕</button></div>
+  <div class="cl" id="chL"></div>
+</div>
+
+<div class="header">
+  <div class="header-title"><span class="brand">阅</span><span id="pgTitle">书库</span></div>
+  <div class="header-actions">
+    <button class="icon-btn" id="chBtn" title="目录" style="display:none">☰</button>
+    <button class="icon-btn" id="userBtn" title="用户">👤</button>
+  </div>
+</div>
+
+<!-- Login -->
+<div class="page active" id="p-login">
+  <div class="auth-box">
+    <div class="logo">📖</div>
+    <h1>阅书</h1>
+    <p>小说阅读与管理平台</p>
+    <div class="form-group">
+      <label>用户名</label>
+      <input type="text" id="loginUser" placeholder="输入用户名">
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" id="loginPass" placeholder="输入密码">
+    </div>
+    <button class="btn btn-primary btn-block" id="loginBtn">登录</button>
+    <div class="auth-link">还没账号？<a id="goReg">去注册</a></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">
+      管理员: admin / admin123
+    </div>
+  </div>
+</div>
+
+<!-- Register -->
+<div class="page" id="p-reg">
+  <div class="auth-box">
+    <div class="logo">📝</div>
+    <h1>注册</h1>
+    <p>创建你的账号</p>
+    <div class="form-group">
+      <label>用户名</label>
+      <input type="text" id="regUser" placeholder="至少2个字符">
+    </div>
+    <div class="form-group">
+      <label>昵称</label>
+      <input type="text" id="regNick" placeholder="显示名称（可选）">
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input type="password" id="regPass" placeholder="至少4个字符">
+    </div>
+    <button class="btn btn-primary btn-block" id="regBtn">注册</button>
+    <div class="auth-link">已有账号？<a id="goLogin">去登录</a></div>
+  </div>
+</div>
+
+<!-- Bookshelf -->
+<div class="page" id="p-shelf">
+  <div class="card" style="padding:14px;">
+    <div class="row">
+      <div style="font-size:24px;">👤</div>
+      <div class="flex-1">
+        <div style="font-weight:700;" id="dispName"></div>
+        <div style="font-size:12px;color:var(--text2);" id="dispRole"></div>
+      </div>
+      <button class="btn btn-sm btn-ghost" id="logoutBtn" style="color:var(--danger);">退出</button>
+    </div>
+    <div class="row mt-8">
+      <button class="btn btn-sm btn-ghost flex-1" id="showAll">🌐 全部</button>
+      <button class="btn btn-sm btn-ghost flex-1" id="showMine">📚 我的</button>
+    </div>
+  </div>
+  <div class="book-grid" id="shelfGrid"></div>
+  <div class="empty" id="shelfEmpty"><div class="icon">📚</div><p>书架空空</p></div>
+</div>
+
+<!-- Upload -->
+<div class="page" id="p-upload">
+  <div class="card">
+    <div class="card-title">📤 上传小说</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>书名</label>
+        <input type="text" id="novTitle" placeholder="小说名称">
+      </div>
+      <div class="form-group">
+        <label>作者</label>
+        <input type="text" id="novAuthor" placeholder="作者名">
+      </div>
+    </div>
+    <div class="upload-area" id="uploadArea">
+      <div class="icon">📂</div>
+      <div class="hint">点击选择 .txt 文件</div>
+      <div class="sub">自动识别 UTF-8/GBK 编码</div>
+    </div>
+    <input type="file" id="fileInput" accept=".txt" style="display:none">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;" id="fileName">未选择文件</div>
+    <button class="btn btn-primary btn-block" id="uploadBtn">提交审核</button>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 我的上传</div>
+    <div id="myUploads"></div>
+  </div>
+</div>
+
+<!-- Admin -->
+<div class="page" id="p-admin">
+  <div class="card">
+    <div class="card-title">📊 运营概览</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+      <div><div style="font-size:24px;font-weight:800;" id="stUsers">0</div><div style="font-size:11px;color:var(--text2);">用户</div></div>
+      <div><div style="font-size:24px;font-weight:800;" id="stTotal">0</div><div style="font-size:11px;color:var(--text2);">小说</div></div>
+      <div><div style="font-size:24px;font-weight:800;color:var(--warn);" id="stPending">0</div><div style="font-size:11px;color:var(--text2);">待审核</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📝 审核队列</div>
+    <div id="reviewList"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 用户管理</div>
+    <div id="userList"></div>
+  </div>
+</div>
+
+<!-- Reader -->
+<div class="page" id="p-reader">
+  <div style="margin-bottom:16px;">
+    <button class="btn btn-sm btn-ghost" id="backBtn">← 返回书架</button>
+  </div>
+  <div class="reader-title" id="rdTitle"></div>
+  <div class="reader-content" id="rdContent"></div>
+  <div class="reader-nav">
+    <button class="btn btn-sm btn-ghost" id="prevCh">‹ 上一章</button>
+    <span style="font-size:12px;color:var(--text2);" id="rdInfo">1 / 1</span>
+    <button class="btn btn-sm btn-ghost" id="nextCh">下一章 ›</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-p="p-shelf"><span class="ti">📚</span><span>书架</span></button>
+  <button class="tab-btn" data-p="p-upload"><span class="ti">📤</span><span>上传</span></button>
+  <button class="tab-btn" data-p="p-admin" id="adminTab" style="display:none"><span class="ti">⚙</span><span>管理</span></button>
+</div>
+
+<script>
+// ====================== Data Layer ======================
+const IS_SERVER = window.location.protocol !== 'file:' && window.location.host !== '';
+
+let DB = { users: [], novels: [] };
+let _dbReady = Promise.resolve();
+
+// IDB local fallback
+const IDB_N='novel_rdr_db', IDB_V=1, IDB_S='d';
+function openIDB(){return new Promise((r,j)=>{const q=indexedDB.open(IDB_N,IDB_V);q.onupgradeneeded=()=>{const d=q.result;if(!d.objectStoreNames.contains(IDB_S))d.createObjectStore(IDB_S);};q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error);});}
+
+async function api(m,p,b){
+  const o={method:m,headers:{}};
+  if(b&&!(b instanceof FormData)){o.headers['Content-Type']='application/json';o.body=JSON.stringify(b);}
+  if(curUser) o.headers['Authorization']=curUser.id;
+  try{const r=await fetch(p,o);const d=await r.json();if(!r.ok)throw Error(d.error||'请求失败');return d;}catch(e){if(IS_SERVER)throw e;return null;}
+}
+
+async function dbSave(){
+  if(IS_SERVER) return; // server saves on each operation
+  try{const d=await openIDB();const t=d.transaction(IDB_S,'readwrite');t.objectStore(IDB_S).put(JSON.parse(JSON.stringify(DB)),'m');await new Promise((r,j)=>{t.oncomplete=r;t.onerror=j;});d.close();}catch(e){}
+}
+async function dbLoad(){
+  if(IS_SERVER){try{const d=await api('GET','/api/sync');if(d){DB.novels=d.novels||[];}}catch{}return;}
+  try{const d=await openIDB();const t=d.transaction(IDB_S,'readonly');const q=t.objectStore(IDB_S).get('m');const data=await new Promise((r)=>{q.onsuccess=()=>r(q.result);});d.close();if(data){DB.users=data.users||[];DB.novels=data.novels||[];}}catch(e){}
+  if(!DB.users.find(u=>u.user==='admin'&&u.role==='admin')){DB.users.push({id:'admin-001',user:'admin',pass:'admin123',role:'admin',nick:'管理员',regAt:Date.now()});await dbSave();}
+}
+DB._save=function(){dbSave().catch(e=>console.error('save',e));};
+_dbReady=dbLoad();
+function toast(m) {
+  const t = document.createElement('div'); t.className='toast'; t.textContent=m;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2000);
+}
+
+const $ = id=>document.getElementById(id);
+let curUser = null;
+let shelfMode = 'all';
+
+const COVERS = ['#c0392b','#2c6e49','#2c5282','#6b46c1','#b7791f','#2d3748','#553c7b','#9b2c2c'];
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function ago(ts){const m=Math.floor((Date.now()-ts)/60000);if(m<60)return m+'分钟前';const h=Math.floor(m/60);return h+'小时前';}
+
+function sbadge(s){
+  const m={pending:'待审核',approved:'已上架',rejected:'未通过'};
+  const c={pending:'badge-p',approved:'badge-a',rejected:'badge-r'};
+  return `<span class="badge ${c[s]}">${m[s]||s}</span>`;
+}
+
+function uuid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function genId(){return uuid();}
+
+// ====================== Views ======================
+function show(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  $(p).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+  const t = document.querySelector(`.tab-btn[data-p="${p}"]`);
+  if(t) t.classList.add('active');
+  // Chapter sidebar btn
+  if(p==='p-reader'&&rdNovel) $('chBtn').style.display='';
+  else $('chBtn').style.display='none';
+  $('pgTitle').textContent = p==='p-shelf'?'书库':p==='p-upload'?'上传':p==='p-admin'?'管理':p==='p-reader'?'阅读':'阅书';
+}
+
+// ====================== Auth ======================
+$('loginBtn').addEventListener('click',async()=>{
+  const u=$('loginUser').value.trim(),p=$('loginPass').value.trim();
+  if(!u||!p){toast('请填写完整');return;}
+  await _dbReady;
+  let user;
+  if(IS_SERVER){
+    try{const d=await api('POST','/api/login',{username:u,password:p});if(d){user={id:d.userId,user:u,pass:p,role:d.role,nick:d.nickname||u,regAt:Date.now()};}}catch(e){toast('登录失败:'+e.message);return;}
+  }else{
+    user=DB.users.find(x=>x.user===u&&x.pass===p);
+    if(!user){toast('用户名或密码错误');return;}
+  }
+  curUser=user;localStorage.setItem('novel_…s',JSON.stringify({id:user.id,user:user.user,role:user.role,nick:user.nick}));
+  toast('登录成功');afterLogin();
+});
+$('goReg').addEventListener('click',()=>show('p-reg'));
+$('goLogin').addEventListener('click',()=>show('p-login'));
+
+$('regBtn').addEventListener('click',async()=>{
+  const u=$('regUser').value.trim(),n=$('regNick').value.trim()||u,p=$('regPass').value.trim();
+  if(!u||!p){toast('请填写完整');return;}
+  if(u.length<2){toast('用户名至少2个字符');return;}
+  if(p.length<4){toast('密码至少4个字符');return;}
+  await _dbReady;
+  if(!IS_SERVER){
+    if(DB.users.find(x=>x.user===u)){toast('用户名已存在');return;}
+    DB.users.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),user:u,pass:p,role:'user',nick:n,regAt:Date.now()});
+    DB._save();
+  }else{
+    try{await api('POST','/api/register',{username:u,password:p,nickname:n});}catch(e){toast('注册失败:'+e.message);return;}
+  }
+  toast('注册成功，请登录');$('loginUser').value=u;$('loginPass').value=p;show('p-login');
+});
+$('logoutBtn').addEventListener('click',()=>{
+  curUser=null; localStorage.removeItem('novel_…s');
+  toast('已退出'); show('p-login');
+  $('adminTab').style.display='none';
+});
+
+function afterLogin(){
+  $('dispName').textContent = curUser.nick||curUser.user;
+  $('dispRole').textContent = curUser.role==='admin'?'管理员':'普通用户';
+  if(curUser.role==='admin')$('adminTab').style.display='';
+  else $('adminTab').style.display='none';
+  show('p-shelf');
+  renderShelf();
+  if(curUser.role==='admin') renderAdmin();
+  renderMyUploads();
+}
+
+// ====================== Bookshelf ======================
+$('showAll').addEventListener('click',()=>{shelfMode='all';renderShelf();});
+$('showMine').addEventListener('click',()=>{shelfMode='mine';renderShelf();});
+
+async function renderShelf(){
+  await syncNovels();
+  const grid=$('shelfGrid'); const empty=$('shelfEmpty');
+  grid.innerHTML='';
+  let books=DB.novels;
+  if(shelfMode==='mine') books=books.filter(n=>n.uploader===curUser?.id);
+  // Show approved + user's own
+  books=books.filter(n=>n.status==='approved'||n.uploader===curUser?.id);
+  if(books.length===0){empty.style.display='block';return;}
+  empty.style.display='none';
+  books.forEach((n,i)=>{
+    const ci=i%COVERS.length;
+    const c=document.createElement('div'); c.className='book-card';
+    c.innerHTML=`
+      <div class="book-cover" style="background:${COVERS[ci]}">
+        <div class="emoji">📕</div>
+        <div class="title">${esc(n.title)}</div>
+        <div class="bar"><div class="f" style="width:${n.progress||0}%"></div></div>
+      </div>
+      <div class="book-name">${esc(n.title)}</div>`;
+    c.addEventListener('click',()=>openReader(n));
+    grid.appendChild(c);
+  });
+}
+
+// ====================== Reader ======================
+function parseCh(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  const rx=/^(第[一二三四五六七八九十百千0-9]+[章节部回集]|第[0-9]+章|\d+\.\s+|Chapter\s+\d+|序章|前言|序幕|尾声|后记|番外|楔子)/i;
+  const chs=[]; let cur={title:'开头',content:''}; let cnt=0;
+  for(const l of lines){
+    const t=l.trim();
+    if(rx.test(t)&&cnt>3){chs.push(cur);cur={title:t,content:''};}
+    else cur.content+=(cur.content?'\n\n':'')+t;
+    cnt++;
+  }
+  if(cur.content) chs.push(cur);
+  if(chs.length===0) chs.push({title:'全文',content:text});
+  return chs;
+}
+
+let rdNovel=null, rdCh=0;
+
+function openReader(n){
+  if(IS_SERVER&&!n.content){
+    // Fetch content from server
+    toast('加载中…');
+    api('GET','/api/novels/'+n.id).then(data=>{
+      if(data&&data.novel){n.content=data.novel.content;doRead(n);}
+      else toast('加载失败');
+    }).catch(e=>toast('加载失败'));
+  }else{doRead(n);}
+}
+function doRead(n){
+  const chs=parseCh(n.content);
+  rdNovel={...n,chapters:chs};rdCh=0;
+  show('p-reader');renderCh();
+  n.progress=Math.round((rdCh+1)/chs.length*100);
+  DB._save();
+}
+function renderCh(){
+  if(!rdNovel)return;
+  const ch=rdNovel.chapters[rdCh];
+  $('rdTitle').textContent=ch.title;
+  $('rdInfo').textContent=`${rdCh+1}/${rdNovel.chapters.length}`;
+  $('rdContent').innerHTML=ch.content.split('\n\n').filter(Boolean).map(p=>`<p>${esc(p.trim())}</p>`).join('');
+  $('prevCh').disabled=rdCh===0;
+  $('nextCh').disabled=rdCh>=rdNovel.chapters.length-1;
+  window.scrollTo(0,0);
+  // Update progress
+  if(rdNovel) {
+    const n=DB.novels.find(x=>x.id===rdNovel.id);
+    if(n){n.progress=Math.round((rdCh+1)/rdNovel.chapters.length*100);DB._save();}
+  }
+}
+
+$('prevCh').addEventListener('click',()=>{if(rdCh>0){rdCh--;renderCh();}});
+$('nextCh').addEventListener('click',()=>{if(rdNovel&&rdCh<rdNovel.chapters.length-1){rdCh++;renderCh();}});
+$('backBtn').addEventListener('click',()=>{rdNovel=null;show('p-shelf');renderShelf();});
+
+// Keyboard swipe
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{
+  if(!rdNovel||tx===0)return;
+  const d=e.changedTouches[0].screenX-tx;
+  if(Math.abs(d)>50){if(d>0)$('prevCh').click();else$('nextCh').click();}
+  tx=0;
+});
+
+// ====================== Chapter Sidebar ======================
+function showChSidebar(){
+  if(!rdNovel)return;
+  const el=$('chL');
+  el.innerHTML=rdNovel.chapters.map((c,i)=>`<div class="ci${i===rdCh?' a':''}" data-i="${i}">${esc(c.title||'无标题')}</div>`).join('');
+  el.querySelectorAll('.ci').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      rdCh=parseInt(btn.dataset.i);
+      renderCh();
+      hideChSidebar();
+    });
+  });
+  $('chOv').classList.add('s');
+  $('chP').classList.add('s');
+}
+function hideChSidebar(){$('chOv').classList.remove('s');$('chP').classList.remove('s');}
+$('chOv').addEventListener('click',hideChSidebar);
+$('chX').addEventListener('click',hideChSidebar);
+$('chBtn').addEventListener('click',showChSidebar);
+
+// ====================== Upload ======================
+$('uploadArea').addEventListener('click',()=>$('fileInput').click());
+$('fileInput').addEventListener('change',e=>{
+  const f=e.target.files[0];
+  $('fileName').textContent=f?f.name:'未选择文件';
+  if(f) $('novTitle').value = f.name.replace(/\.txt$/i,'');
+});
+
+// Encoding detection helper
+function detectEncoding(text,file,cb){
+  let bad=0;
+  for(let i=0;i<Math.min(500,text.length);i++){const c=text.charCodeAt(i);if(c>=0x80&&c<=0x9F||c>=0xA1&&c<=0xBF)bad++;}
+  if(text.length>20&&bad/text.length>0.02){
+    const fr=new FileReader();
+    fr.onload=function(e){
+      try{const arr=new Uint8Array(e.target.result);text=new TextDecoder('gbk').decode(arr);}catch{}
+      cb(text);
+    };
+    fr.readAsArrayBuffer(file);
+  }else{cb(text);}
+}
+
+$('uploadBtn').addEventListener('click',async()=>{
+  if(!curUser){toast('请先登录');return;}
+  const file=$('fileInput').files[0];
+  if(!file){toast('请先选择 .txt 文件');return;}
+  const btn=$('uploadBtn');btn.disabled=true;btn.innerHTML='⏳ 处理中…';
+  try{
+    const text=await new Promise((res)=>{
+      const r=new FileReader();
+      r.onload=function(ev){detectEncoding(ev.target.result,file,res);};
+      r.onerror=function(){toast('读取失败');res(null);};
+      r.readAsText(file,'utf-8');
+    });
+    if(!text||text.trim().length<10){toast('文件内容为空');btn.disabled=false;btn.innerHTML='提交审核';return;}
+    const title=$('novTitle').value.trim()||file.name.replace(/.txt$/i,'');
+    const author=$('novAuthor').value.trim()||'未知';
+    if(IS_SERVER){
+      await api('POST','/api/novels/upload',{title,author,content:text});
+    }else{
+      DB.novels.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),title,author,content:text,uploader:curUser.id,uploaderName:curUser.nick||curUser.user,status:'pending',uploadedAt:Date.now(),rejectReason:'',progress:0});
+      DB._save();
+    }
+    toast('✅ 上传成功，等待管理员审核');
+    $('fileInput').value='';$('fileName').textContent='未选择文件';$('novTitle').value='';$('novAuthor').value='';
+    if(IS_SERVER){try{const d=await api('GET','/api/novels?userId='+curUser.id);if(d)DB.novels=d.novels||[];}catch{}}
+    renderMyUploads();renderShelf();
+  }catch(e){toast('❌ '+e.message);}
+  btn.disabled=false;btn.innerHTML='提交审核';
+});
+async function syncNovels(){
+  if(!IS_SERVER||!curUser)return;
+  try{const d=await api('GET','/api/novels');if(d)DB.novels=d.novels||[];}catch{}
+  try{const d2=await api('GET','/api/sync');if(d2)DB.users=d2.users||[];}catch{}
+}
+async function renderMyUploads(){
+  if(!curUser)return;
+  await syncNovels();
+  const el=$('myUploads');
+  const mine=DB.novels.filter(n=>n.uploader===curUser.id);
+  if(mine.length===0){
+    el.innerHTML='<div class="empty"><p style="font-size:13px;">暂无上传记录</p></div>';
+    return;
+  }
+  el.innerHTML=mine.map(n=>`
+    <div class="novel-item">
+      <div class="info">
+        <div class="t">${esc(n.title)} <small style="color:var(--text3)">${esc(n.author)}</small></div>
+        <div class="s">${sbadge(n.status)} ${n.rejectReason?'· '+esc(n.rejectReason):''} · ${ago(n.uploadedAt)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ====================== Admin ======================
+async function renderAdmin(){
+  await syncNovels();
+  const total=DB.novels.length;
+  const pending=DB.novels.filter(n=>n.status==='pending').length;
+  const approved=DB.novels.filter(n=>n.status==='approved').length;
+  $('stUsers').textContent=DB.users.length;
+  $('stTotal').textContent=total;
+  $('stPending').textContent=pending;
+
+  // Review queue
+  const rl=$('reviewList');
+  const pends=DB.novels.filter(n=>n.status==='pending');
+  if(pends.length===0){
+    rl.innerHTML='<div class="empty"><p style="font-size:13px;">暂无待审核</p></div>';
+  } else {
+    rl.innerHTML=pends.map(n=>`
+      <div class="novel-item">
+        <div class="info">
+          <div class="t">${esc(n.title)} <small style="color:var(--text3)">${esc(n.author)}</small></div>
+          <div class="s">上传者: ${esc(n.uploaderName)} · ${ago(n.uploadedAt)}</div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button class="btn btn-sm btn-success" onclick="reviewNovel('${n.id}','approved','')">通过</button>
+          <button class="btn btn-sm btn-ghost" onclick="reviewNovel('${n.id}','rejected','')">驳回</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // User list
+  const ul=$('userList');
+  ul.innerHTML=DB.users.map(u=>`
+    <div class="novel-item">
+      <div class="info">
+        <div class="t">${esc(u.nick||u.user)} (${esc(u.user)})</div>
+        <div class="s">${u.role==='admin'?'管理员':'普通用户'} · 注册${ago(u.regAt)}</div>
+      </div>
+      ${u.id!==curUser?.id?`<button class="btn btn-sm btn-ghost" onclick="delUser('${u.id}')">✕</button>`:''}
+    </div>
+  `).join('');
+}
+
+window.reviewNovel = async function(id,status,reason){
+  if(status==='rejected'){
+    reason=prompt('驳回原因（可选）:','')||'未通过审核';
+  }
+  if(IS_SERVER){
+    try{await api('PUT','/api/novels/'+id+'/review',{status,reason});toast(status==='approved'?'已上架':'已驳回');await renderAdmin();await renderShelf();await renderMyUploads();return;}catch(e){toast('操作失败:'+e.message);return;}
+  }
+  const n=DB.novels.find(x=>x.id===id);
+  if(!n)return;
+  n.status=status;
+  n.rejectReason=status==='rejected'?reason:'';
+  n.reviewedAt=Date.now();
+  DB._save();
+  toast(status==='approved'?'已上架':'已驳回');
+  renderAdmin();
+  renderShelf();
+  renderMyUploads();
+};
+
+window.delUser = function(id){
+  if(!confirm('确认删除此用户？'))return;
+  DB.users=DB.users.filter(u=>u.id!==id);
+  DB._save();
+  renderAdmin();
+};
+
+// ====================== Tabs ======================
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',async()=>{
+    const p=btn.dataset.p;
+    show(p);
+    if(p==='p-shelf')await renderShelf();
+    if(p==='p-upload')await renderMyUploads();
+    if(p==='p-admin')await renderAdmin();
+  });
+});
+
+$('userBtn').addEventListener('click',async()=>{
+  if(curUser){show('p-shelf');await renderShelf();}
+  else show('p-login');
+});
+
+// ====================== Init ======================
+(function boot(){
+  show('p-login');
+  // Show loading
+  _initReady.then(()=>{
+    const saved=localStorage.getItem('novel_…s');
+    if(saved){
+      try{
+        const s=JSON.parse(saved);
+        const u=DB.users.find(x=>x.id===s.id);
+        if(u){curUser=u;afterLogin();}
+      }catch{}
+    }
+  });
+})();
+</script>
+</body>
+</html>
