@@ -9,10 +9,21 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
-      - name: Build
-        run: bash build-android.sh
-      - name: Upload
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Sync and Build
+        working-directory: ./android
+        run: |
+          npm install @capacitor/core @capacitor/android
+          cp ../app.html ../www/index.html 2>/dev/null || true
+          ../node_modules/.bin/cap sync android 2>/dev/null || true
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          echo "=== APK output ==="
+          find . -name "*.apk" 2>/dev/null
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
-          path: /tmp/app-debug.apk
+          path: "**/*.apk"
