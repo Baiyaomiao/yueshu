@@ -9,20 +9,17 @@ jobs:
         with: java-version: 17; distribution: 'temurin'
       - uses: actions/setup-node@v4
         with: node-version: 20
-      - name: Copy app
-        run: cp -f app.html android/app/src/main/assets/index.html 2>/dev/null || true
-      - name: Setup Android SDK
-        run: |
-          mkdir -p $ANDROID_HOME/licenses
-          echo "24333f8a63b6825ea9c5514f83c2829b004d1fe" > $ANDROID_HOME/licenses/android-sdk-license
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Update index
+        run: cp app.html www/index.html
+      - name: Sync
+        working-directory: ./android
+        run: ./gradlew --no-daemon 2>/dev/null; true
       - name: Build APK
         working-directory: ./android
-        run: |
-          curl -sL "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -o /tmp/gradle.zip
-          unzip -q /tmp/gradle.zip -d /tmp/gradle
-          /tmp/gradle/gradle-8.5/bin/gradle assembleDebug --no-daemon
-      - name: Upload APK
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
