@@ -13,18 +13,16 @@ jobs:
         with:
           node-version: 20
       - name: Build
-        working-directory: ./android
         run: |
-          cp ../app.html ../www/index.html 2>/dev/null || true
-          npm install @capacitor/core @capacitor/android 2>/dev/null || true
-          ../node_modules/.bin/cap sync android 2>/dev/null || true
+          set -e
+          cp app.html www/index.html
+          npm install @capacitor/core@6.1.2 @capacitor/android@6.1.2 @capacitor/cli@6.1.2
+          npx cap sync android
+          cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -q
-      - name: Find APK
-        run: find $GITHUB_WORKSPACE -name "*.apk" -o -name "*.aab" 2>/dev/null
-      - name: Upload
+          ./gradlew assembleDebug --no-daemon
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
-          path: ${{ github.workspace }}/*.apk
-          if-no-files-found: info
+          path: android/app/build/outputs/apk/debug/*.apk
