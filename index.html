@@ -134,7 +134,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
 /* ===== TOC ===== */
 .tl{max-height:50vh;overflow-y:auto;padding:4px 0}
 .ti{padding:11px 16px;font-size:13px;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
-.ti:hover{background:rgba(128,128,128,.03)}
+.ti:hover{background:rgba(128,128,128,.03)}.bm-i{padding:12px 16px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}.bm-i:active{background:rgba(128,128,128,.04)}.bm-i .bm-t{font-weight:600;font-size:13px}.bm-i .bm-s{font-size:11px;color:var(--text3);margin-top:2px}.bm-i .bm-d{font-size:11px;color:var(--accent);float:right;background:0;border:none;cursor:pointer;padding:2px 6px;border-radius:4px}
 .ti:active{background:rgba(128,128,128,.06)}
 .ti.ac{border-left-color:var(--accent);background:rgba(192,57,43,.05);color:var(--accent);font-weight:600}
 
@@ -190,7 +190,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
   <div class="rt" id="rTop">
     <button class="hi" id="rBk" style="font-size:20px;width:auto;padding:0 8px">‹</button>
     <div class="rti" id="rTi">阅读</div>
-    <button class="hi" id="rTo">📖</button>
+    <button class="hi" id="rBm">🔖</button><button class="hi" id="rFs">🔍</button><button class="hi" id="rTo">📖</button>
   </div>
   <div class="rb" id="rBd">
     <div class="tz tz-l" id="tzP"></div>
@@ -249,6 +249,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
   <div class="spr"><label>🔤 字号</label><input type="range" id="fsS" min="12" max="28" value="18"><span style="font-size:12px;color:var(--text2);min-width:24px;text-align:center" id="fsL">18</span></div>
   <div class="spr"><label>📏 行距</label><select id="lhS"><option value="1.5">紧凑</option><option value="1.9" selected>舒适</option><option value="2.2">宽松</option><option value="2.6">超宽</option></select></div>
   <div class="spr"><label>🎨 主题</label><div class="td ac" data-t="sepia" style="background:#f0ebe3;border-color:var(--accent)"></div><div class="td" data-t="dark" style="background:#1a1a1a"></div><div class="td" data-t="green" style="background:#e5f0db"></div><div class="td" data-t="blue" style="background:#dee8f2"></div></div>
+  <div class="spr"><label>🖐 单手</label><span style="font-size:12px;color:var(--text3);flex:1">点击屏幕左右两侧翻下一页</span><button class="hi" id="ohTg" style="font-size:13px;width:auto;padding:4px 14px;border:1px solid var(--border);border-radius:8px;color:var(--text2)">关闭</button></div>
   <div class="spr"><label>📄 双页</label><span style="font-size:12px;color:var(--text3);flex:1">横屏可用</span><button class="hi" id="duTg" style="font-size:13px;width:auto;padding:4px 14px;border:1px solid var(--border);border-radius:8px;color:var(--text2)">关闭</button></div>
   <div style="border-top:1px solid var(--border);margin:14px 0 10px;padding-top:14px"><div style="font-size:14px;font-weight:600;margin-bottom:14px;text-align:center">🖼 自定义背景</div><div class="spr"><button class="hi" id="bgBtn" style="font-size:12px;width:auto;padding:6px 14px;border:1px solid var(--border);border-radius:8px">📁 选择图片</button><button class="hi" id="bgRst" style="font-size:12px;width:auto;padding:6px 14px;border:1px solid var(--border);border-radius:8px;color:var(--accent)">🗑 移除</button></div><div class="spr"><label style="min-width:auto">🌫 模糊</label><input type="range" id="bgBl" min="0" max="20" value="0"><span style="font-size:12px;color:var(--text2);min-width:28px;text-align:center" id="bgBlL">0px</span></div><div id="bgPr" style="width:100%;height:60px;border-radius:8px;border:1px solid var(--border);background-size:cover;background-position:center;margin-top:6px;background:var(--bg)" class="bg-na"><div style="text-align:center;line-height:60px;font-size:12px;color:var(--text3)">未设置背景</div></div><input type="file" id="bgIn" accept="image/*" style="display:none"></div>
 
@@ -257,6 +258,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC','Pin
 </div>
 
 <div class="so" id="tcOv"></div>
+<div class="so" id="bmOv"></div>
+<div class="sp" id="bmPn">
+  <div class="sp-t" style="display:flex;align-items:center;justify-content:space-between">🔖 书签 <button id="bmX" style="background:0;border:none;font-size:18px;color:var(--text2);cursor:pointer;padding:4px">✕</button></div>
+  <div style="padding:12px 0;text-align:center"><button class="btn btn-p" id="bmAdd" style="width:auto;padding:10px 28px;display:inline-block;font-size:13px">+ 添加书签</button></div>
+  <div class="tl" id="bmL"><div class="empty"><div class="ei">🔖</div><p>暂无书签</p></div></div>
+</div>
+<div class="so" id="fsOv"></div>
+<div class="sp" id="fsPn">
+  <div class="sp-t" style="display:flex;align-items:center;justify-content:space-between">🔍 全文搜索 <button id="fsX" style="background:0;border:none;font-size:18px;color:var(--text2);cursor:pointer;padding:4px">✕</button></div>
+  <div class="ob" style="border:none;padding:0 0 8px"><input type="text" id="fsIn" placeholder="搜索小说内容…" style="font-size:15px;padding:12px 14px"><button class="hi" id="fsGo" style="font-size:14px;width:auto;padding:0 16px;color:var(--accent);font-weight:600">搜索</button></div>
+  <div class="tl" id="fsL" style="max-height:40vh"><div class="empty"><div class="ei">🔍</div><p>输入关键词搜索</p></div></div>
+</div>
 <div class="sp" id="tcPn">
   <div class="sp-t" style="display:flex;align-items:center;justify-content:space-between">📖 目录 <button id="tcX" style="background:0;border:none;font-size:18px;color:var(--text2);cursor:pointer;padding:4px">✕</button></div>
   <div class="tl" id="tcL"></div>
@@ -478,6 +491,36 @@ $('rDb').addEventListener('click',function(){if(curN)dN(curN.id);});
 
 (async function(){await _rdyP;rSh();})();
 window.dB=dB;window.dN=dN;window.oR=oR;window.jC=jC;
+/* one-hand */
+var ohOn=true;(function(){var el=$('ohTg');if(!el)return;el.addEventListener('click',function(){ohOn=!ohOn;this.textContent=ohOn?'开启':'关闭';this.style.color=ohOn?'var(--accent)':'var(--text2)';var a=$('tzP'),b=$('tzN');if(ohOn){a.style.display='';b.style.display='';}else{a.style.display='none';b.style.display='none';}try{localStorage.setItem('ys_oh',ohOn?'1':'0');}catch(e){}});
+try{if(localStorage.getItem('ys_oh')==='0')el.click();}catch(e){}})();
+
+/* bookmarks */
+function loadBm(){try{return JSON.parse(localStorage.getItem('ys_bm')||'[]');}catch(e){return [];}}
+function saveBm(b){try{localStorage.setItem('ys_bm',JSON.stringify(b));}catch(e){}}
+function renderBm(){var bs=loadBm().filter(function(b){return b.nid===curN.id;});var el=$('bmL');if(bs.length===0){el.innerHTML='<div class=\"empty\"><div class=\"ei\">🔖</div><p>暂无书签</p></div>';return;}
+el.innerHTML=bs.map(function(b,i){return '<div class=\"bm-i\" onclick=\"jBm('+i+')\"><span class=\"bm-t\">'+es(b.chapter||'')+'</span><button class=\"bm-d\" onclick=\"event.stopPropagation();dBm('+i+')\">✕</button><div class=\"bm-s\">位置 '+(b.pos+1)+' &middot; '+b.time+'</div></div>';}).join('');}
+function jBm(i){var bs=loadBm().filter(function(b){return b.nid===curN.id;});if(!bs[i])return;var b=bs[i];curC=Math.min(b.chapterIdx,curN._cs.length-1);curP=Math.min(b.pos,9999);rPg();cBm();}
+function dBm(i){var bs=loadBm();var items=bs.filter(function(b){return b.nid===curN.id;});if(!items[i])return;var idx=bs.indexOf(items[i]);if(idx>-1){bs.splice(idx,1);saveBm(bs);renderBm();tt('已删除书签');}}
+function oBm(){renderBm();$('bmOv').style.display='block';$('bmOv').classList.add('s');$('bmPn').classList.add('s');}
+function cBm(){$('bmOv').style.display='none';$('bmOv').classList.remove('s');$('bmPn').classList.remove('s');}
+$('bmAdd').addEventListener('click',function(){if(!curN)return;var bs=loadBm();var ch=curN._cs&&curN._cs[curC]?curN._cs[curC].title:'未知';var d=new Date();var t=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');bs.push({nid:curN.id,chapter:ch,chapterIdx:curC,pos:curP,time:t,ts:Date.now()});saveBm(bs);renderBm();tt('✅ 已添加书签');});
+$('rBm').addEventListener('click',oBm);$('bmOv').addEventListener('click',cBm);$('bmX').addEventListener('click',cBm);
+
+/* full-text search */
+function oFs(){$('fsOv').style.display='block';$('fsOv').classList.add('s');$('fsPn').classList.add('s');$('fsIn').value='';$('fsIn').focus();$('fsL').innerHTML='<div class=\"empty\"><div class=\"ei\">🔍</div><p>输入关键词搜索</p></div>';}
+function cFs(){$('fsOv').style.display='none';$('fsOv').classList.remove('s');$('fsPn').classList.remove('s');}
+$('rFs').addEventListener('click',oFs);$('fsOv').addEventListener('click',cFs);$('fsX').addEventListener('click',cFs);
+$('fsIn').addEventListener('keydown',function(e){if(e.key==='Enter')doFs();});
+$('fsGo').addEventListener('click',doFs);
+function doFs(){var q=$('fsIn').value.trim().toLowerCase();var el=$('fsL');if(!q||!curN||!curN.content){el.innerHTML='<div class=\"empty\"><div class=\"ei\">🔍</div><p>输入关键词搜索</p></div>';return;}
+var lines=curN.content.split('\\n');var rs=[];lines.forEach(function(l,i){if(l.toLowerCase().indexOf(q)!==-1)rs.push({line:i,text:l.substring(0,80)});});
+if(rs.length===0){el.innerHTML='<div class=\"empty\"><div class=\"ei\">📖</div><p>未找到 "<b>'+es(q)+'</b>"</p></div>';return;}
+el.innerHTML=rs.slice(0,100).map(function(r){return '<div class=\"ti\" onclick=\"jFs('+r.line+')\">'+es(r.text)+'</div>';}).join('')+(rs.length>100?'<div style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">...还有 '+(rs.length-100)+' 条结果</div>':'');
+}
+function jFs(i){if(!curN||!curN._cs)return;var n=0;for(var c=0;c<curN._cs.length;c++){var ch=curN._cs[c];var ls=(ch.content||'').split('\\n').filter(Boolean);if(n+ls.length>i){curC=c;curP=0;rPg();cFs();return;}n+=ls.length;}}
+
+
 </script>
 </body>
 </html>
