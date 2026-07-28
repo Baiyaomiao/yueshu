@@ -16,12 +16,21 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      - name: Copy latest app
-        run: |
-          cp index.html android/app/src/main/assets/index.html 2>/dev/null || true
+      - name: Install dependencies
+        run: npm install
+
+      - name: Copy index.html
+        run: cp app.html index.html
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Fix Android config
+        run: npx cap sync android
 
       - name: Build APK
         working-directory: ./android
