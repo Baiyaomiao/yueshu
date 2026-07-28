@@ -9,68 +9,11 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
-      - name: Build APK
-        run: |
-          set -e -x
-          # Setup SDK
-          cd /tmp
-          curl -sL -o clt.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-          unzip -q clt.zip
-          mkdir -p android-sdk/cmdline-tools && mv cmdline-tools android-sdk/cmdline-tools/latest
-          export ANDROID_HOME=/tmp/android-sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-          yes | sdkmanager --sdk_root=$ANDROID_HOME "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
-          echo "SDK ready"
-          # Project
-          mkdir -p /tmp/p/app/src/main/assets /tmp/p/app/src/main/java/r /tmp/p/app/src/main/res/values
-          cp $GITHUB_WORKSPACE/app.html /tmp/p/app/src/main/assets/index.html
-          cat > /tmp/p/app/src/main/java/r/Main.java << 'JAVA'
-          package r;
-          import android.app.Activity; import android.os.Bundle; import android.webkit.WebView;
-          public class Main extends Activity {
-            @Override protected void onCreate(Bundle b) {
-              super.onCreate(b); WebView w = new WebView(this);
-              w.getSettings().setJavaScriptEnabled(true); w.getSettings().setDomStorageEnabled(true);
-              w.loadUrl("file:///android_asset/index.html"); setContentView(w);
-            }
-          }
-JAVA
-          cat > /tmp/p/app/src/main/AndroidManifest.xml << 'XML'
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest package="ys.reader" xmlns:android="http://schemas.android.com/apk/res/android">
-          <uses-permission android:name="android.permission.INTERNET"/>
-          <application android:label="藏书阁" android:theme="@style/T">
-          <activity android:name=".Main" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
-          </application></manifest>
-XML
-          cat > /tmp/p/app/src/main/res/values/theme.xml << 'XML2'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources><style name="T" parent="android:Theme.Material.Light.NoActionBar"/></resources>
-XML2
-          cat > /tmp/p/settings.gradle << 'E1'
-          rootProject.name='YS'; include ':app'
-E1
-          cat > /tmp/p/build.gradle << 'E2'
-          buildscript { repositories { google();mavenCentral() } dependencies { classpath 'com.android.tools.build:gradle:8.2.0' } }
-          allprojects { repositories { google();mavenCentral() } }
-E2
-          cat > /tmp/p/app/build.gradle << 'E3'
-          plugins { id 'com.android.application' }
-          android { namespace 'ys.reader'; compileSdk 34
-            defaultConfig { applicationId 'ys.reader'; minSdk 24; targetSdk 34; versionCode 1; versionName '1.0' }
-            buildTypes { release { minifyEnabled false } } }
-          dependencies { implementation 'androidx.appcompat:appcompat:1.7.0' }
-E3
-          echo "sdk.dir=$ANDROID_HOME" > /tmp/p/local.properties
-          echo "android.useAndroidX=true" > /tmp/p/gradle.properties
-          echo "org.gradle.jvmargs=-Xmx2g" >> /tmp/p/gradle.properties
-          # Build
-          curl -sL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip -q /tmp/gradle.zip -d /tmp/
-          /tmp/gradle-8.5/bin/gradle -p /tmp/p assembleDebug --no-daemon
-          echo "APK output:"
-          find /tmp/p -name "*.apk" 2>/dev/null
-          cp /tmp/p/app/build/outputs/apk/debug/*.apk /tmp/final.apk 2>/dev/null || true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build
+        run: node build-apk.js
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
