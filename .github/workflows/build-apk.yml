@@ -6,20 +6,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
-        with: java-version: 17; distribution: 'temurin'
+        with:
+          java-version: 17
+          distribution: temurin
       - uses: actions/setup-node@v4
-        with: node-version: 20
+        with:
+          node-version: 20
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
       - name: Update index
         run: cp app.html www/index.html
-      - name: Sync
-        working-directory: ./android
-        run: ./gradlew --no-daemon 2>/dev/null; true
       - name: Build APK
         working-directory: ./android
         run: ./gradlew assembleDebug --no-daemon
-      - name: Upload
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
