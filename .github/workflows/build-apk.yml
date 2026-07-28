@@ -1,28 +1,29 @@
 name: Build APK
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Create Android WebView project
-        id: create
-        uses: twlz0ne/android-webview-apk-action@v1
-        with:
-          app_name: 阅书
-          package_name: ys.reader
-          version_code: 1
-          version_name: "1.0.0"
-          html_file: index.html
-          icon: icon-512.png
-          
+      - uses: actions/setup-java@v4
+        with: java-version: 17; distribution: 'temurin'
+      - uses: actions/setup-node@v4
+        with: node-version: 20
+      - name: Copy app
+        run: cp -f app.html android/app/src/main/assets/index.html 2>/dev/null || true
+      - name: Setup Android SDK
+        run: |
+          mkdir -p $ANDROID_HOME/licenses
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fe" > $ANDROID_HOME/licenses/android-sdk-license
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-34" "build-tools;34.0.0" 2>/dev/null || true
+      - name: Build APK
+        working-directory: ./android
+        run: |
+          curl -sL "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp/gradle
+          /tmp/gradle/gradle-8.5/bin/gradle assembleDebug --no-daemon
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: yueshu-apk
-          path: ${{ steps.create.outputs.apk_path }}
+          path: android/app/build/outputs/apk/debug/*.apk
