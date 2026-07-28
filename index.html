@@ -356,13 +356,24 @@ $('tzC').addEventListener('click',function(){
   else{rstAh();}
 });
 /* Page turn modes */
-$('tzP').addEventListener('click',function(){if(pgMd!='tap')return;pP();rstAh();});
-$('tzN').addEventListener('click',function(){if(pgMd!='tap')return;nP();rstAh();});
-/* Swipe support */
+/* Tap zone - works in click, slide, and none modes */
+$('tzP').addEventListener('click',function(){
+  if(pgMd==='scroll')return;pP();rstAh();
+});
+$('tzN').addEventListener('click',function(){
+  if(pgMd==='scroll')return;nP();rstAh();
+});
+/* Swipe support - works in ALL modes but most natural in slide */
 (function(){
   var sx=0,swiping=false;
-  $('rBd').addEventListener('touchstart',function(e){if(pgMd!='slide')return;sx=e.touches[0].clientX;swiping=true;});
-  $('rBd').addEventListener('touchmove',function(e){if(!swiping||pgMd!='slide')return;var dx=e.touches[0].clientX-sx;if(Math.abs(dx)>30){swiping=false;if(dx>0)pP();else nP();rstAh();}});
+  $('rBd').addEventListener('touchstart',function(e){
+    sx=e.touches[0].clientX;swiping=true;
+  });
+  $('rBd').addEventListener('touchmove',function(e){
+    if(!swiping)return;
+    var dx=e.touches[0].clientX-sx;
+    if(Math.abs(dx)>40){swiping=false;if(dx>0)pP();else nP();rstAh();}
+  });
   $('rBd').addEventListener('touchend',function(){swiping=false;});
 })();
 $('pgBa').addEventListener('input',function(){if(!curN||!curN._cs)return;var t=curN._cs.length,idx=Math.round(parseInt(this.value)/100*(t-1));if(idx!==curC){curC=idx;curP=0;rPg();}});
@@ -370,7 +381,18 @@ $('prCh').addEventListener('click',function(){if(curC>0){curC--;curP=0;rPg();}})
 $('nxCh').addEventListener('click',function(){if(curN&&curC<curN._cs.length-1){curC++;curP=0;rPg();}});
 $('rBk').addEventListener('click',function(){$('rdr').classList.remove('show');curN=null;rSh();;});
 
-function oTc(){if(!curN||!curN._cs)return;$('tcL').innerHTML=curN._cs.map(function(c,i){return '<div class="ti'+(i===curC?' ac':'')+'" onclick="jC('+i+')">'+es(c.title||'无标题')+'</div>';}).join('');$('tcOv').style.display='block';$('tcOv').classList.add('s');$('tcPn').classList.add('s');}
+function oTc(){
+  if(!curN||!curN._cs)return;
+  var html='<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px"><div style="width:40px;height:48px;border-radius:6px;background:'+CV[curN._cs.length%CV.length]+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0">📖</div><div><div style="font-weight:700;font-size:15px">'+es(curN.title)+'</div><div style="font-size:12px;color:var(--text3);margin-top:2px">共 '+curN._cs.length+' 章</div></div></div>';
+  var list=curN._cs.map(function(c,i){return '<div class="ti'+(i===curC?' ac':'')+'" onclick="jC('+i+')">'+es(c.title||'无标题')+'</div>';}).join('');
+  $('tcL').innerHTML=list;  // keep content in scrollable area
+  // Update the title area
+  var pn=$('tcPn');
+  pn.innerHTML='<div class="sp-t" style="display:flex;align-items:center;justify-content:space-between;padding:0 6px">📖 目录 <button id="tcX" style="background:0;border:none;font-size:18px;color:var(--text2);cursor:pointer;padding:4px">✕</button></div>'+html+'<div class="tl" id="tcL">'+list+'</div>';
+  // Re-bind close button
+  $('tcX').addEventListener('click',cTc);
+  $('tcOv').style.display='block';$('tcOv').classList.add('s');pn.classList.add('s');
+}
 function cTc(){$('tcOv').style.display='none';$('tcOv').classList.remove('s');$('tcPn').classList.remove('s');}
 function jC(i){curC=i;curP=0;rPg();cTc();}
 
@@ -384,15 +406,21 @@ $('rFb').addEventListener('click',oSt);
 $('rTb').addEventListener('click',oSt);
 $('stOv').addEventListener('click',cSt);
 /* Page mode handler */
+/* Page turn mode handler */
 $('pgMd').addEventListener('change',function(){
-  pgMd=this.value;var ct=$('chTx');
+  pgMd=this.value;var ct=$('chTx'),tzP=$('tzP'),tzN=$('tzN');
   if(pgMd==='scroll'){
-    ct.style.overflowY='auto';ct.style.overflowX='hidden';ct.style.maxHeight='100%';
-    $('tzP').style.display='none';$('tzN').style.display='none';$('pgBa').style.display='none';$('pgIn').style.display='none';
+    ct.style.overflowY='auto';ct.style.overflowX='hidden';
+    tzP.style.display='none';tzN.style.display='none';
+    $('pgBa').style.display='none';$('pgIn').style.display='none';
   }else{
-    ct.style.overflowY='';ct.style.overflowX='';ct.style.maxHeight='';
-    $('tzP').style.display='';$('tzN').style.display='';$('pgBa').style.display='';$('pgIn').style.display='';
+    ct.style.overflowY='';ct.style.overflowX='';
+    tzP.style.display='';tzN.style.display='';
+    $('pgBa').style.display='';$('pgIn').style.display='';
   }
+  // In all modes except scroll, tap zones work
+  // In slide mode, taps go through tzP/tzN click handlers which check pgMd
+  // Additional swipe is handled by touch events
   try{localStorage.setItem('ys_pg',pgMd);}catch(e){}
   if(curN)rPg();
 });
